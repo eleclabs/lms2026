@@ -1,29 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageHeader from "@/components/shared/PageHeader";
+import EmptyState from "@/components/shared/EmptyState";
+import UserTable from "@/components/admin/UserTable";
+import { User, UserRole } from "@/types/user";
+import { getUsers, updateUserRole } from "@/services/client/userService";
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   async function loadUsers() {
-    const res = await fetch("/api/admin/users");
-    const data = await res.json();
-    setUsers(data);
+    setUsers(await getUsers());
   }
 
-  async function updateRole(userId: string, role: string) {
-    await fetch("/api/admin/users/role", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        role,
-      }),
-    });
-
-    loadUsers();
+  async function handleRoleChange(userId: string, role: UserRole) {
+    await updateUserRole(userId, role);
+    await loadUsers();
   }
 
   useEffect(() => {
@@ -31,46 +24,17 @@ export default function AdminUsersPage() {
   }, []);
 
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-6">
-        จัดการผู้ใช้
-      </h1>
+    <main className="min-h-screen bg-gray-100 p-8">
+      <PageHeader
+        title="จัดการผู้ใช้"
+        description="กำหนดสิทธิ์ Admin / Teacher / Student"
+      />
 
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="text-left p-4">Name</th>
-              <th className="text-left p-4">Email</th>
-              <th className="text-left p-4">Role</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id} className="border-t">
-                <td className="p-4">{user.name}</td>
-
-                <td className="p-4">{user.email}</td>
-
-                <td className="p-4">
-                  <select
-                    value={user.role}
-                    onChange={(e) =>
-                      updateRole(user._id, e.target.value)
-                    }
-                    className="border rounded-lg px-3 py-2"
-                  >
-                    <option value="admin">admin</option>
-                    <option value="teacher">teacher</option>
-                    <option value="student">student</option>
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {users.length > 0 ? (
+        <UserTable users={users} onRoleChange={handleRoleChange} />
+      ) : (
+        <EmptyState message="ยังไม่มีผู้ใช้" />
+      )}
     </main>
   );
 }

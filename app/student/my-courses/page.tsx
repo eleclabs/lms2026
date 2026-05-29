@@ -1,59 +1,93 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
-export default function StudentCoursesPage() {
-  const [courses, setCourses] = useState<any[]>([]);
+import PageHeader from "@/components/shared/PageHeader";
+import { getMyEnrollments } from "@/services/client/enrollmentService";
+import { Enrollment } from "@/types/enrollment";
 
-  async function loadCourses() {
-    const res = await fetch("/api/student/my-courses");
-    const data = await res.json();
+export default function StudentMyCoursesPage() {
+  const [items, setItems] = useState<Enrollment[]>([]);
 
-    setCourses(data);
+  async function loadData() {
+    try {
+      const data = await getMyEnrollments();
+      setItems(data);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "โหลดข้อมูลไม่สำเร็จ");
+    }
   }
 
   useEffect(() => {
-    loadCourses();
+    loadData();
   }, []);
 
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-6">
-        วิชาที่ลงทะเบียน
-      </h1>
+    <main className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          title="วิชาที่ลงทะเบียน"
+          description="รายวิชาที่คุณลงทะเบียนเรียนแล้ว"
+        />
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {courses.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white rounded-2xl shadow p-5"
-          >
-            <h2 className="font-bold text-lg">
-              {item.course.title}
-            </h2>
-
-            <div className="mt-4">
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-green-500"
-                  style={{
-                    width: `${item.progress}%`,
-                  }}
-                />
-              </div>
-
-              <p className="text-sm mt-2">
-                Progress {item.progress}%
-              </p>
-            </div>
-
-            <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-xl">
-              เข้าเรียน
-            </button>
+        {items.length === 0 ? (
+          <div className="text-center text-gray-500 mt-10">
+            ยังไม่ได้ลงทะเบียนรายวิชา
           </div>
-        ))}
+        ) : (
+          <div className="grid md:grid-cols-3 gap-5">
+            {items.map((item) => (
+              <div
+                key={item._id}
+                className="bg-white rounded-2xl shadow overflow-hidden"
+              >
+                {item.course.thumbnail ? (
+                  <img
+                    src={item.course.thumbnail}
+                    alt={item.course.title}
+                    className="h-40 w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-40 bg-gray-200 flex items-center justify-center text-gray-400">
+                    No Cover
+                  </div>
+                )}
+
+                <div className="p-5">
+                  <h2 className="font-bold text-lg">
+                    {item.course.title}
+                  </h2>
+
+                  <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                    {item.course.description || "ไม่มีรายละเอียด"}
+                  </p>
+
+                  <div className="mt-4">
+                    <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green-500"
+                        style={{ width: `${item.progress}%` }}
+                      />
+                    </div>
+
+                    <p className="text-sm mt-2">
+                      Progress {item.progress}%
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/student/courses/${item.course._id}/learn`}
+                    className="block text-center mt-5 bg-blue-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    เข้าเรียน
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
 }
-

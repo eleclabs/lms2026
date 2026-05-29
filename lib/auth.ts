@@ -1,15 +1,16 @@
-
 import { NextAuthOptions } from "next-auth";
+
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 
 import { connectDB } from "@/lib/mongodb";
+
 import {
   validateUserPassword,
   createOAuthUserIfNotExists,
   findUserByEmail,
-} from "@/services/userService";
+} from "@/services/server/userService";
 
 export const authOptions: NextAuthOptions = {
   providers: [

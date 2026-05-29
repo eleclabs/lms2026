@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 
 import { connectDB } from "@/lib/mongodb";
-import { createCredentialsUser } from "@/services/userService";
+import { createCredentialsUser } from "@/services/server/userService";
 
 export async function POST(req: Request) {
   try {

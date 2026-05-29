@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { connectDB } from "@/lib/mongodb";
-import { saveResetToken } from "@/services/userService";
-import { sendResetPasswordEmail } from "@/services/emailService";
+import { saveResetToken } from "@/services/server/userService";
+import { sendResetPasswordEmail } from "@/services/core/emailService";
 
 export async function POST(req: Request) {
   const safeMessage =

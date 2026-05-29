@@ -1,39 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageHeader from "@/components/shared/PageHeader";
+import CategoryForm from "@/components/admin/CategoryForm";
+import CategoryList from "@/components/admin/CategoryList";
+import EmptyState from "@/components/shared/EmptyState";
+import { Category, CategoryForm as CategoryFormType } from "@/types/category";
+import {
+  getCategories,
+  createCategory,
+} from "@/services/client/categoryService";
+
+const defaultForm = {
+  name: "",
+  description: "",
+};
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-  });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [form, setForm] = useState<CategoryFormType>(defaultForm);
+  const [loading, setLoading] = useState(false);
 
   async function loadCategories() {
-    const res = await fetch("/api/admin/categories");
-    const data = await res.json();
-    setCategories(data);
+    setCategories(await getCategories());
   }
 
-  async function createCategory(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const res = await fetch("/api/admin/categories", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setForm({ name: "", description: "" });
-      loadCategories();
-    } else {
-      alert(data.message);
+    if (!form.name.trim()) {
+      alert("กรุณากรอกชื่อหมวดหมู่");
+      return;
     }
+
+    setLoading(true);
+    await createCategory(form);
+    setLoading(false);
+
+    setForm(defaultForm);
+    await loadCategories();
   }
 
   useEffect(() => {
@@ -41,44 +46,24 @@ export default function AdminCategoriesPage() {
   }, []);
 
   return (
-    <main className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">จัดการหมวดหมู่รายวิชา</h1>
+    <main className="min-h-screen bg-gray-100 p-8">
+      <PageHeader
+        title="จัดการหมวดหมู่รายวิชา"
+        description="เพิ่มหมวดหมู่สำหรับจัดกลุ่มรายวิชา"
+      />
 
-      <form
-        onSubmit={createCategory}
-        className="bg-white rounded-2xl shadow p-6 mb-6 max-w-xl"
-      >
-        <input
-          className="w-full border rounded-xl px-4 py-3 mb-3"
-          placeholder="ชื่อหมวดหมู่ เช่น Programming"
-          value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
-        />
+      <CategoryForm
+        form={form}
+        loading={loading}
+        onChange={setForm}
+        onSubmit={handleSubmit}
+      />
 
-        <textarea
-          className="w-full border rounded-xl px-4 py-3 mb-3"
-          placeholder="รายละเอียด"
-          value={form.description}
-          onChange={(e) =>
-            setForm({ ...form, description: e.target.value })
-          }
-        />
-
-        <button className="bg-blue-600 text-white px-5 py-3 rounded-xl">
-          เพิ่มหมวดหมู่
-        </button>
-      </form>
-
-      <div className="grid md:grid-cols-3 gap-4">
-        {categories.map((cat) => (
-          <div key={cat._id} className="bg-white rounded-xl p-5 shadow">
-            <h2 className="font-bold">{cat.name}</h2>
-            <p className="text-sm text-gray-500">{cat.description}</p>
-          </div>
-        ))}
-      </div>
+      {categories.length > 0 ? (
+        <CategoryList categories={categories} />
+      ) : (
+        <EmptyState message="ยังไม่มีหมวดหมู่" />
+      )}
     </main>
   );
 }

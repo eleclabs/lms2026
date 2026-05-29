@@ -2,68 +2,174 @@
 
 import { useEffect, useState } from "react";
 
-export default function AdminCoursesPage() {
-  const [courses, setCourses] = useState<any[]>([]);
-  const [title, setTitle] = useState("");
+import PageHeader from "@/components/shared/PageHeader";
+import CourseGrid from "@/components/courses/CourseGrid";
+import CourseForm from "@/components/courses/CourseForm";
 
-  async function loadCourses() {
-    const res = await fetch("/api/courses");
-    const data = await res.json();
-    setCourses(data);
+import {
+  Course,
+  CourseForm as CourseFormType,
+  defaultCourseForm,
+} from "@/types/course";
+
+import { Category } from "@/types/category";
+
+import {
+  getCourses,
+  updateCourse,
+  deleteCourse,
+} from "@/services/client/courseService";
+
+import { getCategories } from "@/services/client/categoryService";
+import { uploadCoverImage } from "@/services/core/uploadService";
+
+export default function AdminCoursesPage() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const [form, setForm] = useState<CourseFormType>(defaultCourseForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function loadData() {
+    try {
+      const [courseData, categoryData] = await Promise.all([
+        getCourses("admin"),
+        getCategories(),
+      ]);
+
+      setCourses(courseData);
+      setCategories(categoryData);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "โหลดข้อมูลไม่สำเร็จ"
+      );
+    }
   }
 
-  async function createCourse() {
-    await fetch("/api/courses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-      }),
+  function startEdit(course: Course) {
+    const categoryId =
+      typeof course.category === "object"
+        ? course.category?._id || ""
+        : course.category || "";
+
+    setEditingId(course._id);
+    setShowForm(true);
+
+    setForm({
+      title: course.title || "",
+      description: course.description || "",
+      price: course.price || 0,
+      category: categoryId,
+      level: course.level || "beginner",
+      thumbnail: course.thumbnail || "",
+      published: Boolean(course.published),
     });
 
-    setTitle("");
-    loadCourses();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function resetForm() {
+    setForm(defaultCourseForm);
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  async function handleUpload(file: File) {
+    try {
+      setUploading(true);
+
+      const url = await uploadCoverImage(file);
+
+      setForm((prev) => ({
+        ...prev,
+        thumbnail: url,
+      }));
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "อัปโหลดรูปไม่สำเร็จ"
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!editingId) return;
+
+    try {
+      setLoading(true);
+
+      await updateCourse(editingId, form, "admin");
+
+      alert("แก้ไขรายวิชาสำเร็จ");
+
+      resetForm();
+      await loadData();
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "แก้ไขรายวิชาไม่สำเร็จ"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(courseId: string) {
+    if (!confirm("ต้องการลบรายวิชานี้ใช่หรือไม่?")) return;
+
+    try {
+      await deleteCourse(courseId, "admin");
+      alert("ลบรายวิชาสำเร็จ");
+      await loadData();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "ลบไม่สำเร็จ");
+    }
   }
 
   useEffect(() => {
-    loadCourses();
+    loadData();
   }, []);
 
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-6">
-        จัดการรายวิชา
-      </h1>
-
-      <div className="flex gap-3 mb-6">
-        <input
-          className="border rounded-xl px-4 py-3"
-          placeholder="ชื่อรายวิชา"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+    <main className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          title="จัดการรายวิชาทั้งหมด"
+          description="Admin สามารถตรวจสอบ แก้ไข และลบรายวิชาได้"
         />
 
-        <button
-          onClick={createCourse}
-          className="bg-blue-600 text-white px-5 rounded-xl"
-        >
-          เพิ่มรายวิชา
-        </button>
-      </div>
+        {showForm && (
+          <CourseForm
+            form={form}
+            categories={categories}
+            loading={loading}
+            uploading={uploading}
+            editing={Boolean(editingId)}
+            onChange={setForm}
+            onSubmit={handleSubmit}
+            onCancel={resetForm}
+            onUpload={handleUpload}
+          />
+        )}
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {courses.map((course) => (
-          <div
-            key={course._id}
-            className="bg-white rounded-2xl shadow p-5"
-          >
-            <h2 className="font-bold text-lg">
-              {course.title}
-            </h2>
-          </div>
-        ))}
+        <CourseGrid
+          courses={courses}
+          role="admin"
+          onEdit={startEdit}
+          onDelete={handleDelete}
+        />
       </div>
     </main>
   );

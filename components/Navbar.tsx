@@ -19,7 +19,6 @@ export default function Navbar() {
 
           {role === "admin" && (
             <>
-              <Link href="/admin">Admin</Link>
               <Link href="/admin/users">จัดการผู้ใช้</Link>
               <Link href="/admin/categories">หมวดหมู่รายวิชา</Link>
               <Link href="/admin/courses">จัดการรายวิชา</Link>
@@ -28,7 +27,6 @@ export default function Navbar() {
 
           {role === "teacher" && (
             <>
-              <Link href="/teacher">Teacher</Link>
               <Link href="/teacher/courses">รายวิชาของฉัน</Link>
               <Link href="/teacher/assignments">งานที่มอบหมาย</Link>
             </>
@@ -36,8 +34,8 @@ export default function Navbar() {
 
           {role === "student" && (
             <>
-              <Link href="/student">Student</Link>
-              <Link href="/student/my-courses">วิชาที่ลงทะเบียน</Link>
+              <Link href="/student/courses">รายวิชาทั้งหมด</Link>
+              <Link href="/student/my-courses">วิชาที่ลงทะเบียน</Link> 
             </>
           )}
 
