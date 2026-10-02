@@ -5,7 +5,7 @@ export default function DashboardPage() {
 
       <div className="grid md:grid-cols-4 gap-4 mt-6">
         <div className="border rounded-xl p-4">
-          <p className="text-gray-500">รายวิชา</p>
+          <p className="text-gray-500">หลักสูตร</p>
           <h2 className="text-3xl font-bold">12</h2>
         </div>
 

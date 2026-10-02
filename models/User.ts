@@ -12,6 +12,8 @@ const UserSchema = new Schema(
 
     image: String,
 
+    imagePublicId: String,
+
     password: String,
 
     provider: {

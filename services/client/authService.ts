@@ -22,15 +22,15 @@ export async function loginWithEmail(email: string, password: string) {
   return res;
 }
 
-export function loginWithGoogle() {
+export function loginWithGoogle(callbackUrl = "/dashboard") {
   return signIn("google", {
-    callbackUrl: "/dashboard",
+    callbackUrl,
   });
 }
 
-export function loginWithFacebook() {
+export function loginWithFacebook(callbackUrl = "/dashboard") {
   return signIn("facebook", {
-    callbackUrl: "/dashboard",
+    callbackUrl,
   });
 }
 

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
   if (!course) {
     return NextResponse.json(
-      { message: "ไม่พบรายวิชา" },
+      { message: "ไม่พบหลักสูตร" },
       { status: 404 }
     );
   }
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
   if (exists) {
     return NextResponse.json(
-      { message: "ลงทะเบียนรายวิชานี้แล้ว" },
+      { message: "ลงทะเบียนหลักสูตรนี้แล้ว" },
       { status: 409 }
     );
   }

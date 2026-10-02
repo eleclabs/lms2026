@@ -10,30 +10,35 @@ import { Enrollment } from "@/types/enrollment";
 export default function StudentMyCoursesPage() {
   const [items, setItems] = useState<Enrollment[]>([]);
 
-  async function loadData() {
-    try {
-      const data = await getMyEnrollments();
-      setItems(data);
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "โหลดข้อมูลไม่สำเร็จ");
-    }
-  }
-
   useEffect(() => {
-    loadData();
+    let active = true;
+
+    getMyEnrollments()
+      .then((data) => {
+        if (active) setItems(data);
+      })
+      .catch((error) => {
+        if (active) {
+          alert(error instanceof Error ? error.message : "โหลดข้อมูลไม่สำเร็จ");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
     <main className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-6xl mx-auto">
         <PageHeader
-          title="วิชาที่ลงทะเบียน"
-          description="รายวิชาที่คุณลงทะเบียนเรียนแล้ว"
+          title="หลักสูตรที่ลงทะเบียน"
+          description="หลักสูตรที่คุณลงทะเบียนเรียนแล้ว"
         />
 
         {items.length === 0 ? (
           <div className="text-center text-gray-500 mt-10">
-            ยังไม่ได้ลงทะเบียนรายวิชา
+            ยังไม่ได้ลงทะเบียนหลักสูตร
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-5">
@@ -43,10 +48,13 @@ export default function StudentMyCoursesPage() {
                 className="bg-white rounded-2xl shadow overflow-hidden"
               >
                 {item.course.thumbnail ? (
-                  <img
-                    src={item.course.thumbnail}
-                    alt={item.course.title}
-                    className="h-40 w-full object-cover"
+                  <div
+                    role="img"
+                    aria-label={item.course.title}
+                    className="h-40 w-full bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${JSON.stringify(item.course.thumbnail)})`,
+                    }}
                   />
                 ) : (
                   <div className="h-40 bg-gray-200 flex items-center justify-center text-gray-400">

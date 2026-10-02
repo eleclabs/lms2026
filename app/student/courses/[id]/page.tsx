@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import PageHeader from "@/components/shared/PageHeader";
 import { enrollCourse } from "@/services/client/enrollmentService";
+import { Course } from "@/types/course";
 
 type Lesson = {
   _id: string;
@@ -18,24 +19,9 @@ export default function StudentCourseDetailPage() {
   const router = useRouter();
   const courseId = params.id as string;
 
-  const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(false);
-
-  async function loadData() {
-    const res = await fetch(`/api/student/courses/${courseId}`, {
-      cache: "no-store",
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setCourse(data.course);
-      setLessons(data.lessons || []);
-    } else {
-      alert(data.message);
-    }
-  }
 
   async function handleEnroll() {
     try {
@@ -53,8 +39,36 @@ export default function StudentCourseDetailPage() {
   }
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!courseId) return;
+
+    const controller = new AbortController();
+
+    fetch(`/api/student/courses/${courseId}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const data = (await response.json()) as {
+          course?: Course;
+          lessons?: Lesson[];
+          message?: string;
+        };
+
+        if (!response.ok || !data.course) {
+          throw new Error(data.message || "โหลดข้อมูลหลักสูตรไม่สำเร็จ");
+        }
+
+        setCourse(data.course);
+        setLessons(data.lessons || []);
+      })
+      .catch((error) => {
+        if (error instanceof Error && error.name !== "AbortError") {
+          alert(error.message);
+        }
+      });
+
+    return () => controller.abort();
+  }, [courseId]);
 
   if (!course) {
     return (
@@ -69,22 +83,25 @@ export default function StudentCourseDetailPage() {
       <div className="max-w-5xl mx-auto">
         <PageHeader
           title={course.title}
-          description="รายละเอียดรายวิชาและบทเรียน"
+          description="รายละเอียดหลักสูตรและบทเรียน"
         />
 
         <div className="bg-white rounded-2xl shadow overflow-hidden">
           {course.thumbnail && (
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              className="w-full h-72 object-cover"
+            <div
+              role="img"
+              aria-label={course.title}
+              className="h-72 w-full bg-cover bg-center"
+              style={{ backgroundImage: `url(${JSON.stringify(course.thumbnail)})` }}
             />
           )}
 
           <div className="p-6">
             <div className="flex gap-2 mb-4">
               <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                {course.category?.name || "ทั่วไป"}
+                {typeof course.category === "object"
+                  ? course.category.name
+                  : "ทั่วไป"}
               </span>
 
               <span className="text-sm bg-gray-100 px-3 py-1 rounded-full">

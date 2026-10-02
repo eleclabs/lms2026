@@ -1,4 +1,4 @@
-export async function uploadFile(
+async function uploadAsset(
   file: File,
   endpoint: string
 ) {
@@ -19,14 +19,23 @@ export async function uploadFile(
     );
   }
 
-  return data.url as string;
+  return data as { url: string; publicId: string };
+}
+
+export async function uploadFile(file: File, endpoint: string) {
+  const uploaded = await uploadAsset(file, endpoint);
+  return uploaded.url;
 }
 
 export function uploadCoverImage(file: File) {
-  return uploadFile(
+  return uploadAsset(
     file,
     "/api/upload/cover"
   );
+}
+
+export function uploadProfileImage(file: File) {
+  return uploadAsset(file, "/api/upload/profile");
 }
 
 export function uploadLessonFile(file: File) {

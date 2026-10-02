@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import AuthCard from "@/components/auth/AuthCard";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import { resetPassword } from "@/services/client/authService";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const token = useSearchParams().get("token") || "";
 
@@ -46,5 +46,13 @@ export default function ResetPasswordPage() {
         onSubmit={handleResetPassword}
       />
     </AuthCard>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">กำลังโหลด...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

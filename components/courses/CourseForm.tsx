@@ -8,7 +8,7 @@ type Props = {
   uploading?: boolean;
   editing?: boolean;
   onChange: (form: CourseFormType) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
   onUpload: (file: File) => void;
 };
@@ -27,13 +27,13 @@ export default function CourseForm({
   return (
     <form onSubmit={onSubmit} className="bg-white rounded-2xl shadow p-6 mb-8">
       <h2 className="text-xl font-bold mb-4">
-        {editing ? "แก้ไขรายวิชา" : "เพิ่มรายวิชาใหม่"}
+        {editing ? "แก้ไขหลักสูตร" : "เพิ่มหลักสูตรใหม่"}
       </h2>
 
       <div className="grid md:grid-cols-2 gap-4">
         <input
           className="border rounded-xl px-4 py-3"
-          placeholder="ชื่อรายวิชา"
+          placeholder="ชื่อหลักสูตร"
           value={form.title}
           onChange={(e) => onChange({ ...form, title: e.target.value })}
         />
@@ -81,7 +81,13 @@ export default function CourseForm({
           className="border rounded-xl px-4 py-3"
           placeholder="Thumbnail URL"
           value={form.thumbnail}
-          onChange={(e) => onChange({ ...form, thumbnail: e.target.value })}
+          onChange={(e) =>
+            onChange({
+              ...form,
+              thumbnail: e.target.value,
+              thumbnailPublicId: "",
+            })
+          }
         />
 
         <label className="border rounded-xl px-4 py-3 cursor-pointer bg-white">
@@ -99,17 +105,18 @@ export default function CourseForm({
       </div>
 
       {form.thumbnail && (
-        <img
-          src={form.thumbnail}
-          alt="thumbnail"
-          className="mt-4 h-48 w-full object-cover rounded-xl"
+        <div
+          role="img"
+          aria-label="ตัวอย่างรูปปกหลักสูตร"
+          className="mt-4 h-48 w-full rounded-xl bg-cover bg-center"
+          style={{ backgroundImage: `url(${JSON.stringify(form.thumbnail)})` }}
         />
       )}
 
       <textarea
         className="w-full border rounded-xl px-4 py-3 mt-4"
         rows={4}
-        placeholder="รายละเอียดรายวิชา"
+        placeholder="รายละเอียดหลักสูตร"
         value={form.description}
         onChange={(e) => onChange({ ...form, description: e.target.value })}
       />
@@ -122,7 +129,7 @@ export default function CourseForm({
             onChange({ ...form, published: e.target.checked })
           }
         />
-        เผยแพร่รายวิชา
+        เผยแพร่หลักสูตร
       </label>
 
       <div className="flex gap-3 mt-5">
@@ -134,7 +141,7 @@ export default function CourseForm({
             ? "กำลังบันทึก..."
             : editing
             ? "บันทึกการแก้ไข"
-            : "บันทึกรายวิชา"}
+            : "บันทึกหลักสูตร"}
         </button>
 
         <button

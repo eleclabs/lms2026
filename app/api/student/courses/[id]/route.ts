@@ -24,7 +24,7 @@ export async function GET(req: Request, context: RouteContext) {
 
   if (!course) {
     return NextResponse.json(
-      { message: "ไม่พบรายวิชา" },
+      { message: "ไม่พบหลักสูตร" },
       { status: 404 }
     );
   }

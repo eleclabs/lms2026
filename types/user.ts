@@ -5,6 +5,7 @@ export type User = {
   name: string;
   email: string;
   image?: string;
+  imagePublicId?: string;
   provider?: string;
   role: UserRole;
 };

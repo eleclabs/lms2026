@@ -43,6 +43,23 @@ const CourseSchema = new Schema(
       type: String,
     },
 
+    thumbnailPublicId: {
+      type: String,
+    },
+
+    ratingAverage: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 0,
+    },
+
+    ratingCount: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+
     published: {
       type: Boolean,
       default: false,

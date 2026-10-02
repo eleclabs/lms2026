@@ -3,9 +3,9 @@ import CourseCard from "./CourseCard";
 
 type Props = {
   courses: Course[];
-  role: "admin" | "teacher" | "student";
+  role: "admin" | "teacher" | "student" | "public";
   onEdit?: (course: Course) => void;
-  onDelete?: (courseId: string) => void;
+  onDelete?: (id: string) => void;
 };
 
 export default function CourseGrid({
@@ -17,13 +17,13 @@ export default function CourseGrid({
   if (courses.length === 0) {
     return (
       <div className="text-center text-gray-500 mt-10">
-        ยังไม่มีรายวิชา
+        ยังไม่มีหลักสูตร
       </div>
     );
   }
 
   return (
-    <div className="grid md:grid-cols-3 gap-5">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {courses.map((course) => (
         <CourseCard
           key={course._id}

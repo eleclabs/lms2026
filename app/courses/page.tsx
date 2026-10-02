@@ -1,38 +1,25 @@
-async function getCourses() {
-  const res = await fetch("http://localhost:3000/api/courses", {
-    cache: "no-store",
-  });
+"use client";
 
-  if (!res.ok) {
-    throw new Error("โหลดข้อมูลรายวิชาไม่สำเร็จ");
-  }
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import CourseCatalogPage from "@/components/courses/CourseCatalogPage";
 
-  return res.json();
+function PublicCatalog() {
+  const searchParams = useSearchParams();
+  return (
+    <CourseCatalogPage
+      scope="public"
+      title="หลักสูตรทั้งหมด"
+      description="เลือกดูรายละเอียดหลักสูตร ผู้สอน คะแนน และสมัครเรียน"
+      initialQuery={searchParams.get("q") || ""}
+    />
+  );
 }
 
-export default async function CoursesPage() {
-  const courses = await getCourses();
-
+export default function CoursesPage() {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-6">รายวิชาในระบบ LMS</h1>
-
-      <div className="grid md:grid-cols-3 gap-4">
-        {courses.map((course: any) => (
-          <div
-            key={course._id}
-            className="border rounded-xl p-4 shadow-sm"
-          >
-            <h2 className="font-semibold text-lg">{course.title}</h2>
-            <p className="text-sm text-gray-600 mt-2">
-              {course.description}
-            </p>
-            <p className="mt-3 text-xs">
-              สถานะ: {course.status}
-            </p>
-          </div>
-        ))}
-      </div>
-    </main>
+    <Suspense fallback={<div className="p-10 text-center text-slate-500">กำลังโหลดหลักสูตร...</div>}>
+      <PublicCatalog />
+    </Suspense>
   );
 }

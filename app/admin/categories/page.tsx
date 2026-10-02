@@ -42,14 +42,26 @@ export default function AdminCategoriesPage() {
   }
 
   useEffect(() => {
-    loadCategories();
+    let active = true;
+
+    getCategories()
+      .then((data) => {
+        if (active) setCategories(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load categories", error);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
     <main className="min-h-screen bg-gray-100 p-8">
       <PageHeader
-        title="จัดการหมวดหมู่รายวิชา"
-        description="เพิ่มหมวดหมู่สำหรับจัดกลุ่มรายวิชา"
+        title="จัดการหมวดหมู่หลักสูตร"
+        description="เพิ่มหมวดหมู่สำหรับจัดกลุ่มหลักสูตร"
       />
 
       <CategoryForm

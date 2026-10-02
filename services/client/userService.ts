@@ -17,6 +17,14 @@ export function getMe() {
   return apiGet<User>("/api/users/me");
 }
 
+export function updateMe(payload: {
+  name: string;
+  image?: string;
+  imagePublicId?: string;
+}) {
+  return apiPatch<User>("/api/users/me", payload);
+}
+
 export function updateUserRole(
   userId: string,
   role: UserRole

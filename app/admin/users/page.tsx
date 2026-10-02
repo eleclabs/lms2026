@@ -20,7 +20,19 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => {
-    loadUsers();
+    let active = true;
+
+    getUsers()
+      .then((data) => {
+        if (active) setUsers(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load users", error);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

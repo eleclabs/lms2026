@@ -47,7 +47,7 @@ export default function LoginForm({
 
       <button
         disabled={loading}
-        className="w-full bg-blue-600 text-white rounded-xl py-3 disabled:bg-gray-400"
+        className="btn btn-light w-full"
       >
         {loading ? "กำลังเข้าสู่ระบบ..." : "Login"}
       </button>
@@ -63,7 +63,7 @@ export default function LoginForm({
         type="button"
         disabled={oauthLoading !== null}
         onClick={onGoogle}
-        className="w-full border rounded-xl py-3 mb-3 disabled:bg-gray-100"
+        className="btn btn-danger mb-3 w-full"
       >
         {oauthLoading === "google"
           ? "กำลังเชื่อมต่อ Google..."
@@ -74,7 +74,7 @@ export default function LoginForm({
         type="button"
         disabled={oauthLoading !== null}
         onClick={onFacebook}
-        className="w-full border rounded-xl py-3 disabled:bg-gray-100"
+        className="btn btn-primary w-full"
       >
         {oauthLoading === "facebook"
           ? "กำลังเชื่อมต่อ Facebook..."

@@ -6,6 +6,7 @@ import {
 } from "@/services/core/httpService";
 
 import { Course, CourseForm } from "@/types/course";
+import { normalizeCoursePayload } from "@/services/shared/courseMapper";
 
 export type CourseScope = "admin" | "teacher" | "student" | "public";
 
@@ -16,28 +17,16 @@ function baseUrl(scope: CourseScope) {
   return "/api/courses";
 }
 
-function normalizeCourseForm(form: CourseForm) {
-  return {
-    title: form.title.trim(),
-    description: form.description,
-    price: Number(form.price) || 0,
-    category: form.category || undefined,
-    level: form.level,
-    thumbnail: form.thumbnail,
-    published: Boolean(form.published),
-  };
-}
-
-export function getCourses(scope: CourseScope) {
+export function getCourses(scope: CourseScope = "public") {
   return apiGet<Course[]>(baseUrl(scope));
 }
 
-export function getCourseById(courseId: string, scope: CourseScope) {
+export function getCourseById(courseId: string, scope: CourseScope = "public") {
   return apiGet<Course>(`${baseUrl(scope)}/${courseId}`);
 }
 
 export function createCourse(form: CourseForm, scope: "admin" | "teacher") {
-  return apiPost<Course>(baseUrl(scope), normalizeCourseForm(form));
+  return apiPost<Course>(baseUrl(scope), normalizeCoursePayload(form));
 }
 
 export function updateCourse(
@@ -47,10 +36,19 @@ export function updateCourse(
 ) {
   return apiPatch<Course>(
     `${baseUrl(scope)}/${courseId}`,
-    normalizeCourseForm(form)
+    normalizeCoursePayload(form)
   );
 }
 
 export function deleteCourse(courseId: string, scope: "admin" | "teacher") {
   return apiDelete<{ message: string }>(`${baseUrl(scope)}/${courseId}`);
+}
+
+export function rateCourse(courseId: string, rating: number) {
+  return apiPost<{
+    message: string;
+    ratingAverage: number;
+    ratingCount: number;
+    userRating: number;
+  }>(`/api/student/courses/${courseId}/rating`, { rating });
 }

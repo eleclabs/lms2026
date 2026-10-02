@@ -6,6 +6,7 @@ export type Lesson = {
   videoUrl?: string;
   pdfUrl?: string;
   order?: number;
+  durationMinutes?: number;
 };
 
 export type LessonForm = {
@@ -15,6 +16,7 @@ export type LessonForm = {
   videoUrl: string;
   pdfUrl: string;
   order: number;
+  durationMinutes: number;
 };
 
 export const defaultLessonForm: LessonForm = {
@@ -24,5 +26,6 @@ export const defaultLessonForm: LessonForm = {
   videoUrl: "",
   pdfUrl: "",
   order: 1,
+  durationMinutes: 0,
 };
 

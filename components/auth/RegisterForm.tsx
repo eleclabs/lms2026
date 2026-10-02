@@ -63,7 +63,7 @@ export default function RegisterForm({ loading, onSubmit }: Props) {
 
       <button
         disabled={loading}
-        className="w-full bg-green-600 text-white rounded-xl py-3 disabled:bg-gray-400"
+        className="btn btn-primary "
       >
         {loading ? "กำลังสมัคร..." : "Register"}
       </button>

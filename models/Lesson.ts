@@ -59,6 +59,11 @@ const LessonSchema = new Schema(
       type: Number,
       default: 1,
     },
+    durationMinutes: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

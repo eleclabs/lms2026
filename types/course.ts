@@ -15,6 +15,15 @@ export type Course = {
   level: CourseLevel;
   teacher?: User | string;
   thumbnail?: string;
+  thumbnailPublicId?: string;
+  ratingAverage?: number;
+  ratingCount?: number;
+  enrollmentCount?: number;
+  enrolled?: boolean;
+  enrollmentProgress?: number;
+  lectureCount?: number;
+  totalDurationMinutes?: number;
+  isBestSeller?: boolean;
   published: boolean;
 };
 
@@ -25,6 +34,7 @@ export type CourseForm = {
   category: string;
   level: CourseLevel;
   thumbnail: string;
+  thumbnailPublicId: string;
   published: boolean;
 };
 
@@ -35,5 +45,6 @@ export const defaultCourseForm: CourseForm = {
   category: "",
   level: "beginner",
   thumbnail: "",
+  thumbnailPublicId: "",
   published: false,
 };

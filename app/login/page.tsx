@@ -1,21 +1,25 @@
-
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthCard from "@/components/auth/AuthCard";
 import LoginForm from "@/components/auth/LoginForm";
-
 import {
   loginWithEmail,
-  loginWithGoogle,
   loginWithFacebook,
+  loginWithGoogle,
 } from "@/services/client/authService";
 
-export default function LoginPage() {
-  const router = useRouter();
+function safeCallbackUrl(value: string | null) {
+  return value?.startsWith("/") && !value.startsWith("//")
+    ? value
+    : "/dashboard";
+}
 
+function LoginContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<
     "google" | "facebook" | null
@@ -24,10 +28,8 @@ export default function LoginPage() {
   async function handleLogin(email: string, password: string) {
     try {
       setLoading(true);
-
       await loginWithEmail(email, password);
-
-      router.push("/dashboard");
+      router.push(callbackUrl);
       router.refresh();
     } catch (error) {
       alert(error instanceof Error ? error.message : "Login ไม่สำเร็จ");
@@ -38,12 +40,12 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     setOauthLoading("google");
-    await loginWithGoogle();
+    await loginWithGoogle(callbackUrl);
   }
 
   async function handleFacebook() {
     setOauthLoading("facebook");
-    await loginWithFacebook();
+    await loginWithFacebook(callbackUrl);
   }
 
   return (
@@ -59,5 +61,13 @@ export default function LoginPage() {
         onFacebook={handleFacebook}
       />
     </AuthCard>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">กำลังโหลด...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

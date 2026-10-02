@@ -1,47 +1,42 @@
+type ApiOptions = Omit<RequestInit, "body"> & {
+  body?: unknown;
+};
 
-export async function apiGet<T>(url: string): Promise<T> {
-  const res = await fetch(url, { cache: "no-store" });
-  const data = await res.json();
-
-  if (!res.ok) throw new Error(data.message || "โหลดข้อมูลไม่สำเร็จ");
-
-  return data;
-}
-
-export async function apiPost<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+export async function apiRequest<T>(
+  url: string,
+  { body, headers, ...options }: ApiOptions = {}
+): Promise<T> {
+  const hasJsonBody = body !== undefined;
+  const response = await fetch(url, {
+    cache: options.method === "GET" || !options.method ? "no-store" : undefined,
+    ...options,
+    headers: {
+      ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
+      ...headers,
+    },
+    body: hasJsonBody ? JSON.stringify(body) : undefined,
   });
+  const data = await response.json();
 
-  const data = await res.json();
+  if (!response.ok) {
+    throw new Error(data.message || "ดำเนินการไม่สำเร็จ");
+  }
 
-  if (!res.ok) throw new Error(data.message || "บันทึกข้อมูลไม่สำเร็จ");
-
-  return data;
+  return data as T;
 }
 
-export async function apiPatch<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(url, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) throw new Error(data.message || "แก้ไขข้อมูลไม่สำเร็จ");
-
-  return data;
+export function apiGet<T>(url: string) {
+  return apiRequest<T>(url, { method: "GET" });
 }
 
-export async function apiDelete<T>(url: string): Promise<T> {
-  const res = await fetch(url, { method: "DELETE" });
-  const data = await res.json();
-
-  if (!res.ok) throw new Error(data.message || "ลบข้อมูลไม่สำเร็จ");
-
-  return data;
+export function apiPost<T>(url: string, body: unknown) {
+  return apiRequest<T>(url, { method: "POST", body });
 }
 
+export function apiPatch<T>(url: string, body: unknown) {
+  return apiRequest<T>(url, { method: "PATCH", body });
+}
+
+export function apiDelete<T>(url: string) {
+  return apiRequest<T>(url, { method: "DELETE" });
+}
